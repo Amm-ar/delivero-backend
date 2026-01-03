@@ -53,7 +53,12 @@ exports.register = async (req, res, next) => {
             }
         });
     } catch (error) {
-        next(error);
+        console.error('Register Error:', error);
+        res.status(500).json({
+            success: false,
+            message: error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        });
     }
 };
 
