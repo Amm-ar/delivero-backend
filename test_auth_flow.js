@@ -37,13 +37,13 @@ async function testAuth(user, roleName) {
         console.log('Register Success:', registerRes.data.success);
         console.log('User ID:', registerRes.data.data.user.id);
 
-        if (!registerRes.data.token) {
+        if (!registerRes.data.data.token) {
             throw new Error('No token received on register');
         }
 
         // 2. Login
         console.log(`Logging in ${roleName}...`);
-        constloginRes = await axios.post(`${API_URL}/login`, {
+        const loginRes = await axios.post(`${API_URL}/login`, {
             email: user.email,
             password: user.password
         });

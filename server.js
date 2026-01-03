@@ -123,19 +123,25 @@ app.use((req, res) => {
 
 // Start server
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => {
-    console.log(`
-╔════════════════════════════════════════╗
-║                                        ║
-║     🚀 DELIVERO API SERVER             ║
-║                                        ║
-║     Environment: ${process.env.NODE_ENV || 'development'}               ║
-║     Port: ${PORT}                           ║
-║     Socket.io: ✅ Enabled               ║
-║                                        ║
-╚════════════════════════════════════════╝
-  `);
-});
+
+if (require.main === module) {
+    server.listen(PORT, () => {
+        console.log(`
+      ╔════════════════════════════════════════╗
+      ║                                        ║
+      ║     🚀 DELIVERO API SERVER             ║
+      ║                                        ║
+      ║     Environment: ${process.env.NODE_ENV || 'development'}               ║
+      ║     Port: ${PORT}                           ║
+      ║     Socket.io: ✅ Enabled               ║
+      ║                                        ║
+      ║     waiting for database...            ║
+      ╚════════════════════════════════════════╝
+    `);
+    });
+}
+
+module.exports = app;
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (err) => {
