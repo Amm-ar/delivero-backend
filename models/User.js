@@ -62,8 +62,8 @@ const userSchema = new mongoose.Schema({
             type: { type: String, enum: ['Point'], default: 'Point' },
             coordinates: [Number]
         },
-        rating: { type: Number, default: 5.0 },
-        totalDeliveries: { type: Number, default: 0 }
+        rating: { type: Number },
+        totalDeliveries: { type: Number }
     },
 
     // Notification settings
@@ -104,6 +104,15 @@ userSchema.index({ 'driverProfile.currentLocation': '2dsphere' });
 userSchema.pre('save', async function (next) {
     if (!this.isModified('password')) {
         return next();
+    }
+
+    // Initialize driver profile defaults if role is driver
+    if (this.role === 'driver' && !this.driverProfile) {
+        this.driverProfile = {
+            rating: 5.0,
+            totalDeliveries: 0,
+            isAvailable: false
+        };
     }
 
     const salt = await bcrypt.genSalt(10);

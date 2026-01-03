@@ -63,7 +63,8 @@ async function testAuth(user, roleName) {
         console.error(`${roleName} Test Failed:`);
         if (error.response) {
             console.error('Status:', error.response.status);
-            console.error('Data:', JSON.stringify(error.response.data, null, 2));
+            console.error('Message:', error.response.data.message);
+            console.error('Error Code:', error.response.data.error?.code); // Log Mongo error code if available
         } else {
             console.error(error.message);
         }
