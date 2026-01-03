@@ -98,7 +98,8 @@ const userSchema = new mongoose.Schema({
 
 // Create geospatial index for location-based queries
 userSchema.index({ 'addresses.location': '2dsphere' });
-userSchema.index({ 'driverProfile.currentLocation': '2dsphere' });
+// Make driverProfile index sparse so it ignores users without a driverProfile
+userSchema.index({ 'driverProfile.currentLocation': '2dsphere' }, { sparse: true });
 
 // Hash password before saving
 userSchema.pre('save', async function (next) {
