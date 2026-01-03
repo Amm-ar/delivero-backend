@@ -13,7 +13,7 @@ const restaurantSchema = new mongoose.Schema({
     },
     description: {
         type: String,
-        required: [true, 'Please provide restaurant description']
+        // required: [true, 'Please provide restaurant description']
     },
     logo: {
         type: String,
@@ -27,22 +27,22 @@ const restaurantSchema = new mongoose.Schema({
     // Contact & Location
     phone: {
         type: String,
-        required: true
+        // required: true
     },
     email: String,
     address: {
         type: String,
-        required: true
+        // required: true
     },
     location: {
         type: { type: String, enum: ['Point'], default: 'Point' },
-        coordinates: { type: [Number], required: true } // [longitude, latitude]
+        coordinates: { type: [Number] } // Optional for initial signup
     },
 
     // Business Info
     cuisine: [{
         type: String,
-        required: true
+        // required: true
     }],
     priceRange: {
         type: String,

@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const Restaurant = require('../models/Restaurant');
 const { validationResult } = require('express-validator');
 
 // @desc    Register user
@@ -13,8 +14,9 @@ exports.register = async (req, res, next) => {
                 errors: errors.array()
             });
         }
+        console.log('Register request body:', req.body);
 
-        const { name, email, phone, password, role } = req.body;
+        const { name, email, phone, password, role, restaurantName } = req.body;
 
         // Check if user already exists
         const existingUser = await User.findOne({ $or: [{ email }, { phone }] });
@@ -34,6 +36,23 @@ exports.register = async (req, res, next) => {
             role: role || 'customer'
         });
 
+        // If role is restaurant, create a restaurant profile
+        if (user.role === 'restaurant' && restaurantName) {
+            const restaurant = await Restaurant.create({
+                name: restaurantName,
+                owner: user._id,
+                phone: user.phone,
+                email: user.email,
+                address: 'Please update your address',
+                cuisine: ['Other'],
+                isActive: true // Set to true for development/testing
+            });
+
+            // Link restaurant to user
+            user.restaurantProfile = restaurant._id;
+            await user.save();
+        }
+
         // Generate token
         const token = user.getSignedJwtToken();
 
@@ -47,7 +66,8 @@ exports.register = async (req, res, next) => {
                     email: user.email,
                     phone: user.phone,
                     role: user.role,
-                    avatar: user.avatar
+                    avatar: user.avatar,
+                    restaurantProfile: user.restaurantProfile
                 },
                 token
             }
