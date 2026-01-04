@@ -145,6 +145,11 @@ exports.createRestaurant = async (req, res, next) => {
 // @access  Private (owner or admin)
 exports.updateRestaurant = async (req, res, next) => {
     try {
+        console.log('Update restaurant - Restaurant ID:', req.params.id);
+        console.log('Update restaurant - Request body:', JSON.stringify(req.body, null, 2));
+        console.log('Update restaurant - User ID:', req.user.id);
+        console.log('Update restaurant - User role:', req.user.role);
+
         let restaurant = await Restaurant.findById(req.params.id);
 
         if (!restaurant) {
@@ -169,14 +174,26 @@ exports.updateRestaurant = async (req, res, next) => {
             delete req.body.commissionRate;
         }
 
+        // Remove null or undefined values to avoid validation issues
+        const updateData = {};
+        Object.keys(req.body).forEach(key => {
+            if (req.body[key] !== null && req.body[key] !== undefined) {
+                updateData[key] = req.body[key];
+            }
+        });
+
+        console.log('Update restaurant - Data to update:', JSON.stringify(updateData, null, 2));
+
         restaurant = await Restaurant.findByIdAndUpdate(
             req.params.id,
-            req.body,
+            updateData,
             {
                 new: true,
                 runValidators: true
             }
         );
+
+        console.log('Update restaurant - Success, updated restaurant:', restaurant.name);
 
         res.status(200).json({
             success: true,
@@ -184,6 +201,12 @@ exports.updateRestaurant = async (req, res, next) => {
             data: restaurant
         });
     } catch (error) {
+        console.error('Update restaurant - Error:', error);
+        console.error('Update restaurant - Error name:', error.name);
+        console.error('Update restaurant - Error message:', error.message);
+        if (error.errors) {
+            console.error('Update restaurant - Validation errors:', error.errors);
+        }
         next(error);
     }
 };
