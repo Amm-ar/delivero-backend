@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const upload = require('../middleware/upload');
-const auth = require('../middleware/auth');
+const { protect } = require('../middleware/auth');
 
 // Single image upload
-router.post('/image', auth, upload.single('image'), (req, res) => {
+router.post('/image', protect, upload.single('image'), (req, res) => {
     if (!req.file) {
         return res.status(400).json({ message: 'No file uploaded' });
     }
