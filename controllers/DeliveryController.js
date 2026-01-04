@@ -104,6 +104,8 @@ exports.acceptOrder = async (req, res, next) => {
         order.status = 'assigned';
         await order.save();
 
+        await order.populate('restaurant', 'name address location');
+
         // Update driver's availability
         await User.findByIdAndUpdate(req.user.id, {
             'driverProfile.isAvailable': false

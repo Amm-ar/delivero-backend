@@ -1,5 +1,7 @@
 const Restaurant = require('../models/Restaurant');
 const MenuItem = require('../models/MenuItem');
+const Order = require('../models/Order');
+const mongoose = require('mongoose');
 
 // @desc    Get all restaurants (with filters)
 // @route   GET /api/restaurants
@@ -248,6 +250,110 @@ exports.toggleStatus = async (req, res, next) => {
             success: true,
             message: `Restaurant is now ${restaurant.isOpen ? 'open' : 'closed'}`,
             data: { isOpen: restaurant.isOpen }
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+// @desc    Get restaurant analytics
+// @route   GET /api/restaurants/:id/analytics
+// @access  Private (restaurant/admin)
+exports.getAnalytics = async (req, res, next) => {
+    try {
+        const { startDate, endDate } = req.query;
+        const restaurantId = req.params.id;
+
+        const dateFilter = { restaurant: mongoose.Types.ObjectId(restaurantId) };
+        if (startDate && endDate) {
+            dateFilter.createdAt = {
+                $gte: new Date(startDate),
+                $lte: new Date(endDate)
+            };
+        }
+
+        // Order statistics
+        const totalOrders = await Order.countDocuments(dateFilter);
+        const completedOrders = await Order.countDocuments({
+            ...dateFilter,
+            status: 'delivered'
+        });
+        const cancelledOrders = await Order.countDocuments({
+            ...dateFilter,
+            status: 'cancelled'
+        });
+
+        // Revenue statistics
+        const revenueStats = await Order.aggregate([
+            {
+                $match: {
+                    ...dateFilter,
+                    status: 'delivered'
+                }
+            },
+            {
+                $group: {
+                    _id: null,
+                    totalRevenue: { $sum: '$pricing.restaurantEarnings' },
+                    averageOrderValue: { $avg: '$pricing.restaurantEarnings' }
+                }
+            }
+        ]);
+
+        const revenue = revenueStats[0] || {
+            totalRevenue: 0,
+            averageOrderValue: 0
+        };
+
+        // Top selling items
+        const topItems = await Order.aggregate([
+            { $match: dateFilter },
+            { $unwind: '$items' },
+            {
+                $group: {
+                    _id: '$items.menuItem',
+                    name: { $first: '$items.name' },
+                    totalQuantity: { $sum: '$items.quantity' },
+                    totalRevenue: { $sum: '$items.subtotal' }
+                }
+            },
+            { $sort: { totalQuantity: -1 } },
+            { $limit: 5 }
+        ]);
+
+        // Orders by day (for chart)
+        const last7Days = new Date();
+        last7Days.setDate(last7Days.getDate() - 7);
+
+        const dailyStats = await Order.aggregate([
+            {
+                $match: {
+                    restaurant: mongoose.Types.ObjectId(restaurantId),
+                    createdAt: { $gte: last7Days }
+                }
+            },
+            {
+                $group: {
+                    _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+                    orders: { $sum: 1 },
+                    revenue: { $sum: '$pricing.restaurantEarnings' }
+                }
+            },
+            { $sort: { _id: 1 } }
+        ]);
+
+        res.status(200).json({
+            success: true,
+            data: {
+                summary: {
+                    totalOrders,
+                    completedOrders,
+                    cancelledOrders,
+                    totalRevenue: revenue.totalRevenue,
+                    averageOrderValue: revenue.averageOrderValue
+                },
+                topItems,
+                dailyStats
+            }
         });
     } catch (error) {
         next(error);
