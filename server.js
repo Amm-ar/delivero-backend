@@ -44,6 +44,7 @@ app.use('/uploads', express.static('uploads'));
 
 // API Routes
 app.use('/api/auth', require('./routes/auth'));
+app.use('/api/upload', require('./routes/upload'));
 app.use('/api/restaurants', require('./routes/restaurants'));
 app.use('/api/restaurants/:restaurantId/menu', require('./routes/menu'));
 app.use('/api/menu', require('./routes/menu'));
