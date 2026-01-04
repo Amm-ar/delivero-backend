@@ -108,6 +108,9 @@ exports.getRestaurant = async (req, res, next) => {
 // @access  Private (restaurant role)
 exports.createRestaurant = async (req, res, next) => {
     try {
+        console.log('Creating restaurant for user:', req.user.id);
+        console.log('Request body:', req.body);
+
         // Add user as owner
         req.body.owner = req.user.id;
 
