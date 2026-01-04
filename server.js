@@ -8,6 +8,12 @@ const http = require('http');
 const socketio = require('socket.io');
 const connectDB = require('./config/database');
 const errorHandler = require('./middleware/errorHandler');
+const fs = require('fs');
+
+// Ensure uploads directory exists
+if (!fs.existsSync('uploads')) {
+    fs.mkdirSync('uploads');
+}
 
 // Initialize express app
 const app = express();
