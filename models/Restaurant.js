@@ -35,7 +35,7 @@ const restaurantSchema = new mongoose.Schema({
         // required: true
     },
     location: {
-        type: { type: String, enum: ['Point'], default: 'Point' },
+        type: { type: String, enum: ['Point'] },
         coordinates: { type: [Number] } // Optional for initial signup
     },
 

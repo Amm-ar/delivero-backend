@@ -114,6 +114,31 @@ exports.createRestaurant = async (req, res, next) => {
         // Add user as owner
         req.body.owner = req.user.id;
 
+        // Handle lat/lng conversion to GeoJSON
+        if (req.body.latitude && req.body.longitude) {
+            req.body.location = {
+                type: 'Point',
+                coordinates: [parseFloat(req.body.longitude), parseFloat(req.body.latitude)]
+            };
+        } else if (req.body.location) {
+            // If location object is passed but coordinates are missing/invalid
+            if (!req.body.location.coordinates ||
+                !Array.isArray(req.body.location.coordinates) ||
+                req.body.location.coordinates.length !== 2) {
+                delete req.body.location;
+            }
+        } else {
+            // Explicitly ensure no location is set if no coordinates
+            delete req.body.location;
+        }
+
+        // Remove empty strings for optional fields
+        ['phone', 'website', 'description'].forEach(field => {
+            if (req.body[field] === '') {
+                delete req.body[field];
+            }
+        });
+
         // Check if user already has a restaurant
         const existingRestaurant = await Restaurant.findOne({ owner: req.user.id });
         if (existingRestaurant) {
@@ -185,8 +210,8 @@ exports.updateRestaurant = async (req, res, next) => {
         // Handle location field - if location is provided but coordinates are missing/invalid,
         // remove it to avoid geospatial index errors
         if (updateData.location) {
-            if (!updateData.location.coordinates || 
-                !Array.isArray(updateData.location.coordinates) || 
+            if (!updateData.location.coordinates ||
+                !Array.isArray(updateData.location.coordinates) ||
                 updateData.location.coordinates.length !== 2) {
                 // Invalid location data - remove it (will keep existing location or default)
                 delete updateData.location;
@@ -194,7 +219,7 @@ exports.updateRestaurant = async (req, res, next) => {
         }
 
         // Fix existing invalid location in database if it exists
-        if (restaurant.location && restaurant.location.type === 'Point' && 
+        if (restaurant.location && restaurant.location.type === 'Point' &&
             (!restaurant.location.coordinates || !Array.isArray(restaurant.location.coordinates) || restaurant.location.coordinates.length !== 2)) {
             // Remove invalid location to fix geospatial index issue
             restaurant.location = undefined;
