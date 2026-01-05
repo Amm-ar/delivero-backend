@@ -182,16 +182,32 @@ exports.updateRestaurant = async (req, res, next) => {
             }
         });
 
+        // Handle location field - if location is provided but coordinates are missing/invalid,
+        // remove it to avoid geospatial index errors
+        if (updateData.location) {
+            if (!updateData.location.coordinates || 
+                !Array.isArray(updateData.location.coordinates) || 
+                updateData.location.coordinates.length !== 2) {
+                // Invalid location data - remove it (will keep existing location or default)
+                delete updateData.location;
+            }
+        }
+
+        // Fix existing invalid location in database if it exists
+        if (restaurant.location && restaurant.location.type === 'Point' && 
+            (!restaurant.location.coordinates || !Array.isArray(restaurant.location.coordinates) || restaurant.location.coordinates.length !== 2)) {
+            // Remove invalid location to fix geospatial index issue
+            restaurant.location = undefined;
+        }
+
         console.log('Update restaurant - Data to update:', JSON.stringify(updateData, null, 2));
 
-        restaurant = await Restaurant.findByIdAndUpdate(
-            req.params.id,
-            updateData,
-            {
-                new: true,
-                runValidators: true
-            }
-        );
+        // Update fields using save() to properly handle nested objects and validation
+        Object.keys(updateData).forEach(key => {
+            restaurant[key] = updateData[key];
+        });
+
+        await restaurant.save();
 
         console.log('Update restaurant - Success, updated restaurant:', restaurant.name);
 
