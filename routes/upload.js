@@ -9,12 +9,10 @@ router.post('/image', protect, upload.single('image'), (req, res) => {
         return res.status(400).json({ message: 'No file uploaded' });
     }
 
-    // Return the relative path for saving in the database
-    const filePath = req.file.path.replace(/\\/g, '/');
     res.json({
         success: true,
         message: 'Image uploaded successfully',
-        imageUrl: `/${filePath}`
+        imageUrl: req.file.path
     });
 });
 
