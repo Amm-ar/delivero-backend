@@ -4,6 +4,7 @@ const {
     getStats,
     getUsers,
     verifyRestaurant,
+    approveRestaurant,
     updateUser,
     getRevenueAnalytics,
     deleteUser
@@ -19,6 +20,7 @@ router.get('/users', getUsers);
 router.put('/users/:id', updateUser);
 router.delete('/users/:id', deleteUser);
 router.put('/restaurants/:id/verify', verifyRestaurant);
+router.put('/restaurants/:id/approve', approveRestaurant);
 router.get('/analytics/revenue', getRevenueAnalytics);
 
 module.exports = router;

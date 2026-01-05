@@ -103,11 +103,11 @@ const restaurantSchema = new mongoose.Schema({
     // Status & Verification
     isActive: {
         type: Boolean,
-        default: false // Requires admin approval
+        default: true // Auto-active for dev
     },
     isVerified: {
         type: Boolean,
-        default: false
+        default: true
     },
     isOpen: {
         type: Boolean,

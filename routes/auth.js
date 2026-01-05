@@ -20,7 +20,7 @@ router.post(
         body('email').isEmail().normalizeEmail().withMessage('Valid email is required'),
         body('phone').trim().notEmpty().withMessage('Phone is required'),
         body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
-        body('role').optional().isIn(['customer', 'restaurant', 'driver']).withMessage('Invalid role')
+        body('role').optional().isIn(['customer', 'restaurant', 'driver', 'admin']).withMessage('Invalid role')
     ],
     register
 );
