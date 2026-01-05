@@ -123,6 +123,7 @@ exports.getUsers = async (req, res, next) => {
 
         const users = await User.find(query)
             .select('-password')
+            .populate('restaurantProfile')
             .sort('-createdAt')
             .skip(skip)
             .limit(parseInt(limit));
@@ -187,7 +188,7 @@ exports.updateUser = async (req, res, next) => {
             req.params.id,
             updateData,
             { new: true, runValidators: true }
-        ).select('-password');
+        ).select('-password').populate('restaurantProfile');
 
         if (!user) {
             return res.status(404).json({
