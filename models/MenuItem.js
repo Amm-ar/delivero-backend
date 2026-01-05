@@ -34,20 +34,7 @@ const menuItemSchema = new mongoose.Schema({
     category: {
         type: String,
         required: true,
-        enum: [
-            'appetizers',
-            'main-course',
-            'desserts',
-            'beverages',
-            'salads',
-            'soups',
-            'sides',
-            'breakfast',
-            'lunch',
-            'dinner',
-            'snacks',
-            'specials'
-        ]
+        trim: true
     },
 
     // Dietary & Preferences
