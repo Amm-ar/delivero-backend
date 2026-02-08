@@ -8,6 +8,8 @@ const http = require('http');
 const socketio = require('socket.io');
 const connectDB = require('./config/database');
 const errorHandler = require('./middleware/errorHandler');
+const { configureSecurity } = require('./middleware/security');
+const { logger, requestLogger } = require('./config/logger');
 const fs = require('fs');
 
 // Ensure uploads directory exists
@@ -33,14 +35,18 @@ const io = socketio(server, {
 // Make io accessible to routes
 app.set('io', io);
 
-// Middleware
-app.use(helmet()); // Security headers
-app.use(cors()); // Enable CORS
-app.use(express.json()); // Body parser
-app.use(express.urlencoded({ extended: true }));
-app.use(compression()); // Compress responses
+// Apply enhanced security middleware
+configureSecurity(app);
 
-// Logging
+// Body parsing middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(compression());
+
+// Request logging
+app.use(requestLogger);
+
+// Development logging
 if (process.env.NODE_ENV === 'development') {
     app.use(morgan('dev'));
 }

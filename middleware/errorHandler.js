@@ -1,9 +1,17 @@
+const { logger, logError } = require('../config/logger');
+
 const errorHandler = (err, req, res, next) => {
     let error = { ...err };
     error.message = err.message;
 
-    // Log to console for dev
-    console.error('Error:', err);
+    // Log error details
+    logError(err, {
+        url: req.originalUrl,
+        method: req.method,
+        ip: req.ip,
+        userAgent: req.get('User-Agent'),
+        userId: req.user ? req.user._id : null,
+    });
 
     // Mongoose bad ObjectId
     if (err.name === 'CastError') {
