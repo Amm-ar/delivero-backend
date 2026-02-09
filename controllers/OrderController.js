@@ -51,6 +51,15 @@ exports.createOrder = async (req, res, next) => {
             });
         }
 
+        // Validate payment method
+        const validPaymentMethods = ['card', 'cash', 'wallet'];
+        if (!validPaymentMethods.includes(paymentMethod)) {
+            return res.status(400).json({
+                success: false,
+                message: `Invalid payment method: ${paymentMethod}. Valid methods are: ${validPaymentMethods.join(', ')}`
+            });
+        }
+
         // Validate and calculate item prices
         const orderItems = [];
         for (const item of items) {
