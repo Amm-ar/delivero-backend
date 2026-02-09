@@ -156,7 +156,7 @@ const orderSchema = new mongoose.Schema({
 });
 
 // Indexes
-orderSchema.index({ orderNumber: 1 });
+// orderNumber already has unique: true in schema, no need for duplicate index
 orderSchema.index({ customer: 1, createdAt: -1 });
 orderSchema.index({ restaurant: 1, status: 1 });
 orderSchema.index({ driver: 1, status: 1 });
