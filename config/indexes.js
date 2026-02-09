@@ -37,7 +37,7 @@ const createIndexes = async () => {
         await db.collection('menuitems').createIndex({ popularity: -1 });
         
         // Orders collection indexes
-        await db.collection('orders').createIndex({ orderNumber: 1 }, { unique: true });
+        // orderNumber already has unique: true in schema, no need to create duplicate index
         await db.collection('orders').createIndex({ customer: 1 });
         await db.collection('orders').createIndex({ restaurant: 1 });
         await db.collection('orders').createIndex({ driver: 1 }, { sparse: true });
